@@ -1,4 +1,4 @@
-# [Casino Appliction]
+# [Casino Application]
 
 ## Project Description
 [The user will be given an option to play plinko, blackjack, mines etc]
