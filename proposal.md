@@ -1,10 +1,10 @@
 # [Casino Application]
 
 ## Project Description
-[The user will be given an option to play plinko, blackjack, mines etc]
+[The user will be given an option to play plinko, blackjack, mines etc.]
 
 ## Main Idea
-[Describe the core concept or functionality of your project]
+[Its a probability based web server where user can deposit, withdraw money from their account and get a chance to win money through the games however its rigged to make the user lose more often than winning.]
 
 ## Technologies
 [i will be using RANDOM and TIME]
@@ -15,4 +15,4 @@
 - Week 7: Project week - focused development time in class
 - Weeks 8-12: Continue working on project, making regular commits
 - Week 13: Project week - focused development time in class
-- Week 14: Project presentation to classmates and instructor
+- Week 14: Project presentation to classmates and instructorasdasdsa
