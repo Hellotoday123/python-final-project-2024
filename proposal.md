@@ -15,4 +15,4 @@
 - Week 7: Project week - focused development time in class
 - Weeks 8-12: Continue working on project, making regular commits
 - Week 13: Project week - focused development time in class
-- Week 14: Project presentation to classmates and instructorasdasdsa
+- Week 14: Project presentation to classmates and instructor
