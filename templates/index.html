@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Plinko Game</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Plinko Game</h1>
+    <div class="game-container">
+        <svg width="600" height="800" viewBox="0 0 600 800">
+            <!-- Background -->
+            <rect width="600" height="800" fill="#2a2a2a"/>
+
+            <!-- Groups for game elements -->
+            <g id="pegs"></g>
+            <g id="slots"></g>
+            <g id="multipliers"></g>
+
+            <!-- Chip will be added dynamically -->
+            <circle id="chip" r="15" fill="gold" style="display: none"/>
+        </svg>
+    </div>
+    <div class="controls">
+        <div class="multiplier" id="result"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/game.js') }}"></script>
+</body>
+</html>
