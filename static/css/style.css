@@ -2,7 +2,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: #1a1a1a;
+    background-color: #393939;
     color: white;
     font-family: Arial, sans-serif;
 }
@@ -31,3 +31,90 @@ body {
     fill: #888 !important;
     cursor: pointer;
 }
+
+.balance {
+    font-size: 15px;
+    font-weight: bold;
+    text-align: center;
+    padding: 5px;}
+
+.main-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    }
+
+    .left{
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    background-color: #2a2a2a;
+    padding: 20px;
+    border-radius: 1rem;
+    height: 550px;
+    box-shadow: 5px 5px 10px 8px lightblue;
+    }
+
+    .middle{
+    width: 700px;
+    }
+
+    .right{
+    width: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #2a2a2a;
+    padding: 20px;
+    border-radius: 1rem;
+    height: 280px;
+    box-shadow: 5px 5px 10px 8px lightblue;
+    }
+
+    .riskLevels{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding-bottom: 50px;}
+
+    .inputs{
+    padding: 10px;
+    border-radius: 1rem;
+    }
+
+    .dashTitles{
+    font-size: 20px;
+    font-weight: bold;
+    padding-top: 20px;
+    text-align: left
+    }
+    .riskLevels button{
+    padding: 10px;
+    border-radius: 1rem;
+    }
+    .riskLevels button:hover{
+    background-color: orange;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    }
+
+    .startButton{
+    padding: 10px;
+    border-radius: 1rem;
+    color: white;
+    font-weight: bold;
+    background-color: #988324;
+    }
+
+    .startButton:hover{
+    background-color: #7e6700;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    }
+
+    .right h1{
+    font-size: 30px;
+    font-weight: bold;
+    text-align: center}

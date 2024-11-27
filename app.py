@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, request, jsonify
 import random
 
 app = Flask(__name__)
@@ -7,7 +7,7 @@ app = Flask(__name__)
 class PlinkoGame:
     def __init__(self):
         self.score = 0
-        self.multipliers = [0.2, 0.5, 1, 1.5, 2, 1.5, 1, 0.5, 0.2]
+        self.multipliers = [50, 10, 5, 1.2, 0.9, 0.5, 0.9, 1.2, 5, 10, 50]
 
     def drop_chip(self, start_position):
         """Simulate chip drop and return path and final position"""
@@ -40,18 +40,51 @@ class PlinkoGame:
 
 game = PlinkoGame()
 
+def read_balance():
+    try:
+        with open('balance.txt', 'r') as f:
+            return float(f.read().strip())
+    except FileNotFoundError:
+        return 0.0
+
+def write_balance(new_balance):
+    with open("balance.txt", "w") as file:
+        file.write(f"{new_balance:.2f}")
+
+@app.route('/get_balance')
+def get_balance():
+    balance = read_balance()  # Read the balance from the file
+    return {'balance': balance}
+
+@app.route('/sync_balance', methods=['POST'])
+def sync_balance():
+    data = request.get_json()
+    balance = data.get('balance')
+    if balance is not None:
+        print(f"Received balance: {balance}")
+        return jsonify({"status": "success", "balance": balance}), 200
+    else:
+        return jsonify({"status": "error", "message": "Balance not provided"}), 400
 
 @app.route('/')
-def home():
-    return render_template('index.html')
-
+def index():
+    balance = read_balance()  # Read the balance from the file
+    return render_template("index.html", balance=balance)
 
 @app.route('/drop/<int:position>')
 def drop(position):
     # Ensure position is within valid range
     position = min(8, max(0, position))
     result = game.drop_chip(position)
+
+    balance = read_balance()
+    new_balance = balance * result['multiplier']
+    write_balance(new_balance)
+
+    result['new_balance'] = new_balance
+
     return jsonify(result)
+
 
 
 if __name__ == '__main__':

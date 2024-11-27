@@ -3,109 +3,89 @@ class PlinkoGame {
         console.log('PlinkoGame constructor starting...');
 
         this.svg = document.querySelector('svg');
-        console.log('Found SVG:', this.svg);
-
         this.pegGroup = document.getElementById('pegs');
         this.slotsGroup = document.getElementById('slots');
         this.multipliersGroup = document.getElementById('multipliers');
         this.chip = document.getElementById('chip');
+        this.displayResult = document.getElementById('result')
+        this.displayBalance = document.getElementById('balance')
 
-        console.log('Found game elements:', {
-            pegs: this.pegGroup,
-            slots: this.slotsGroup,
-            multipliers: this.multipliersGroup,
-            chip: this.chip
-        });
+        this.balance = parseFloat(this.displayBalance.textContent) || 0;
+        this.betAmount = 0;
+        this.getBalance();
 
-        this.multipliers = [0.2, 0.5, 1, 1.5, 2, 1.5, 1, 0.5, 0.2];
+
+        this.multipliers = [50, 10, 5, 1.2, 0.9, 0.5, 0.9, 1.2, 5, 10, 50];
         this.dropZones = [];
-
-        // Initialize Web Audio API
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
         this.dropChip = this.dropChip.bind(this);
 
         this.initializeBoard();
-        console.log('Board initialized with drop zones:', this.dropZones.length);
-
         this.loadSounds();
         this.setupEventListeners();
-
-        // Add visual debug for drop zones
-        this.dropZones.forEach((zone, index) => {
-            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            text.setAttribute("x", zone.getAttribute("cx"));
-            text.setAttribute("y", "30");
-            text.setAttribute("text-anchor", "middle");
-            text.setAttribute("fill", "white");
-            text.setAttribute("font-size", "12");
-            text.textContent = index;
-            this.svg.appendChild(text);
-        });
 
         console.log('PlinkoGame constructor completed');
     }
 
-    setupEventListeners() {
-        this.dropZones.forEach((zone, index) => {
-            zone.addEventListener('click', () => {
-                console.log('Drop zone clicked:', index);
-                this.dropChip(index);
-            });
+
+    async loadSounds() {
+        try {
+            const [pingBuffer, landingBuffer] = await Promise.all([
+                this.loadSound('static/sounds/ping.wav'),
+                this.loadSound('static/sounds/landing.wav')
+            ]);
+            this.sounds = { ping: pingBuffer, landing: landingBuffer };
+        } catch (error) {
+            console.error('Error loading sounds:', error);
+        }
+    }
+
+    async loadSound(url) {
+        const response = await fetch(url);
+        const arrayBuffer = await response.arrayBuffer();
+        return await this.audioContext.decodeAudioData(arrayBuffer);
+    }
+
+    async animateChipTo(x, y) {
+        console.log(`Animating chip to (${x}, ${y})`);
+        return new Promise(resolve => {
+            const animation = this.chip.animate(
+                [
+                    {
+                        cx: this.chip.getAttribute('cx'),
+                        cy: this.chip.getAttribute('cy')
+                    },
+                    { cx: x, cy: y }
+                ],
+                {
+                    duration: 150,
+                    easing: 'ease-in-out',
+                    fill: 'forwards'
+                }
+            );
+            animation.onfinish = resolve;
+            this.chip.setAttribute('cx', x);
+            this.chip.setAttribute('cy', y);
         });
     }
 
-    initializeBoard() {
-        // Create drop zones at the top
-        for (let i = 0; i < 9; i++) {
-            const x = 300 + (i - 4) * 40;
-            const dropZone = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            dropZone.setAttribute("cx", x);
-            dropZone.setAttribute("cy", 50);
-            dropZone.setAttribute("r", 8);
-            dropZone.setAttribute("fill", "#444");
-            dropZone.setAttribute("class", "drop-zone");
-            dropZone.style.cursor = "pointer";
-            dropZone.addEventListener("mouseover", () => dropZone.setAttribute("fill", "#666"));
-            dropZone.addEventListener("mouseout", () => dropZone.setAttribute("fill", "#444"));
-            this.svg.appendChild(dropZone);
-            this.dropZones.push(dropZone);
-        }
+    playPing() {
+        if (!this.sounds.ping) return;
 
-        // Draw pegs
-        for (let row = 0; row < 12; row++) {
-            for (let col = 0; col <= row; col++) {
-                const x = 300 + (col - row/2) * 40;
-                const y = 100 + row * 50;
-                const peg = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                peg.setAttribute("cx", x);
-                peg.setAttribute("cy", y);
-                peg.setAttribute("r", 5);
-                peg.setAttribute("fill", "#666");
-                this.pegGroup.appendChild(peg);
-            }
-        }
+        const source = this.audioContext.createBufferSource();
+        source.buffer = this.sounds.ping;
+        source.connect(this.audioContext.destination);
+        source.start();
+    }
 
-        // Draw slots
-        this.multipliers.forEach((multiplier, i) => {
-            const x = 300 + (i - 4) * 40;
+    playLanding() {
+        if (!this.sounds.landing) return;
 
-            const slot = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-            slot.setAttribute("x", x - 15);
-            slot.setAttribute("y", 700);
-            slot.setAttribute("width", 30);
-            slot.setAttribute("height", 60);
-            slot.setAttribute("fill", "#444");
-            this.slotsGroup.appendChild(slot);
-
-            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            text.setAttribute("x", x);
-            text.setAttribute("y", 780);
-            text.setAttribute("text-anchor", "middle");
-            text.setAttribute("fill", "white");
-            text.textContent = `${multiplier}x`;
-            this.multipliersGroup.appendChild(text);
-        });
+        const source = this.audioContext.createBufferSource();
+        source.buffer = this.sounds.landing;
+        source.connect(this.audioContext.destination);
+        source.start();
     }
 
     async dropChip(startPosition) {
@@ -123,112 +103,191 @@ class PlinkoGame {
         this.chip.setAttribute('cx', startX);
         this.chip.setAttribute('cy', '50');
 
-        try {
-            console.log('Fetching path from server...');
-            const response = await fetch(`/drop/${startPosition}`);
-            const result = await response.json();
-            console.log('Received path:', result.path);
+        let currentX = startX;
+        let currentY = 50;
 
-            for (let i = 0; i < result.path.length; i++) {
-                const [col, row] = result.path[i];
-                const x = 300 + (col - row/2) * 40;
-                const y = 100 + row * 50;
+        for (let row = 0; row < 12; row++) {
+            // Calculate boundaries for each row
+            const maxX = 300 + (row / 2) * 40;
+            const minX = 300 - (row / 2) * 40;
 
-                console.log(`Animating to position ${i}:`, { x, y });
+            console.log(`Row ${row}: maxX=${maxX}, minX=${minX}`);
 
-                await new Promise(resolve => {
-                    const animation = this.chip.animate(
-                        [
-                            {
-                                cx: this.chip.getAttribute('cx'),
-                                cy: this.chip.getAttribute('cy')
-                            },
-                            { cx: x, cy: y }
-                        ],
-                        {
-                            duration: 150,
-                            easing: 'ease-in-out',
-                            fill: 'forwards'
-                        }
-                    );
-                    animation.onfinish = resolve;
-                });
+            // Randomly choose a direction but ensure we stay within boundaries
+            let direction = Math.random() < 0.5 ? -20 : 20;
+            currentX += direction;
 
-                this.chip.setAttribute('cx', x);
-                this.chip.setAttribute('cy', y);
-
-                if (i > 0 && i < result.path.length - 1) {
-                    const pitch = 0.8 + Math.random() * 0.4;
-                    this.playPing(pitch);
-                } else if (i === result.path.length - 1) {
-                    this.playLanding();
-                }
+            // Apply boundary checks
+            if (currentX > maxX) {
+                currentX = maxX;
+            } else if (currentX < minX) {
+                currentX = minX;
             }
 
-            document.getElementById('result').textContent = `Won ${result.multiplier}x!`;
-        } catch (error) {
-            console.error('Error dropping chip:', error);
-            document.getElementById('result').textContent = 'Error dropping chip!';
-        } finally {
-            this.dropZones.forEach(zone => zone.style.pointerEvents = 'auto');
+            currentY += 50;
+            await this.animateChipTo(currentX, currentY);
+
+            if (row > 0 && row < 11) {
+                this.playPing();
+            }
+
+        }
+
+        this.playLanding();
+        // Determine final slot based on chip's ending position
+        const slotWidth = 50;
+        const boardStartX = 300 - ((this.multipliers.length - 1) / 2) * slotWidth;
+        const finalSlotIndex = Math.round((currentX - boardStartX) / slotWidth);
+
+        const clampedIndex = Math.max(0, Math.min(finalSlotIndex, this.multipliers.length - 1));
+        const finalMultiplier = this.multipliers[clampedIndex];
+
+        this.displayResult.textContent = `You won ${finalMultiplier}x!`;
+
+        const winnings = this.betAmount * finalMultiplier;
+
+        this.handleBet(winnings);
+        // Re-enable drop zones
+        this.dropZones.forEach(zone => zone.style.pointerEvents = 'auto');
+    }
+
+
+    setupEventListeners() {
+        const startButton = document.getElementById('startButton');
+        if (startButton) {
+            startButton.addEventListener('click', async () => {
+                console.log('Start button clicked');
+
+                if (this.audioContext.state === 'suspended') {
+                    await this.audioContext.resume();
+                }
+
+
+                const betInput = document.getElementById('betAmount');
+                const ballAmountInput = document.getElementById('ballAmount');
+                this.betAmount = parseFloat(betInput.value) || 0;
+                const ballAmount = parseInt(ballAmountInput.value) || 0;
+                            this.dropChip(4); //temp
+                if (this.validateBet(this.betAmount, ballAmount)) {
+                    this.handleBet(-this.betAmount * ballAmount);
+                    for (let i = 0; i < ballAmount; i++) {
+                        this.dropChip(4);
+                    }
+                }else {
+                    alert('invalid bet amount or insufficient balance')}
+            });
         }
     }
 
-    async loadSounds() {
+    validateBet(bet, ballAmount) {
+        const isValid = bet >0 && bet * ballAmount <= this.balance;
+        console.log(`Validating bet: ${bet} * ${ballAmount} <= ${this.balance} -> ${isValid}`);
+        return isValid;
+    }
+
+    async getBalance() {
         try {
-            // Load sound files
-            const [pingBuffer, landingBuffer] = await Promise.all([
-                this.loadSound('static/sounds/ping.wav'),
-                this.loadSound('static/sounds/landing.wav')
-            ]);
-
-            this.sounds = {}
-            this.sounds.ping = pingBuffer;
-            this.sounds.landing = landingBuffer;
+            const response = await fetch('/get_balance');
+            if (response.ok) {
+                const data = await response.json();
+                this.balance = data.balance || 0;
+                this.updateBalanceDisplay();
+            } else {
+                console.error('Error getting balance');
+            }
         } catch (error) {
-            console.error('Error loading sounds:', error);
+            console.error('Error fetching balance:', error);
         }
     }
 
-    async loadSound(url) {
-        const response = await fetch(url);
-        const arrayBuffer = await response.arrayBuffer();
-        return await this.audioContext.decodeAudioData(arrayBuffer);
+    async syncBalance() {
+    try {
+        const response = await fetch('/sync_balance', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ balance: this.balance })
+        });
+        if (!response.ok) {
+            throw new Error('Failed to sync balance');
+        }
+        console.log('Balance synced successfully');
+        } catch (error) {
+            console.error('Error syncing balance:', error);
+        }
     }
 
-    playPing(pitch = 1) {
-        if (!this.sounds.ping) return;
-
-        const source = this.audioContext.createBufferSource();
-        const gainNode = this.audioContext.createGain();
-
-        source.buffer = this.sounds.ping;
-        source.playbackRate.value = pitch;
-        source.connect(gainNode);
-        gainNode.connect(this.audioContext.destination);
-
-        gainNode.gain.value = 0.3 + Math.random() * 0.2;
-
-        source.start();
+    handleBet(amount) {
+        console.log(`Handling bet: ${amount}`);
+        this.balance += amount;
+        console.log(`New balance: ${this.balance}`);
+        this.updateBalanceDisplay();
+        this.syncBalance();
     }
 
-    playLanding() {
-        if (!this.sounds.landing) return;
+    updateBalanceDisplay() {
+        this.displayBalance.textContent = `Balance: $${this.balance.toFixed(2)}`;
 
-        const source = this.audioContext.createBufferSource();
-        const gainNode = this.audioContext.createGain();
-
-        source.buffer = this.sounds.landing;
-        source.connect(gainNode);
-        gainNode.connect(this.audioContext.destination);
-        gainNode.gain.value = 0.5;
-
-        source.start();
     }
+
+    initializeBoard() {
+        const boardwidth = 300;
+        const slotspacing = 50;
+        const slotwidth = 40;
+        const totalSlots = 11; // Set the number of slots to fill the width as desired
+
+        // Draw pegs
+        for (let row = 1; row < 12; row++) {
+            for (let col = 0; col <= row; col++) {
+                const x = boardwidth + (col - row / 2) * slotspacing;
+                const y = 100 + row * 50;
+                const peg = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                peg.setAttribute("cx", x);
+                peg.setAttribute("cy", y);
+                peg.setAttribute("r", 5);
+                peg.setAttribute("fill", "#666");
+                this.pegGroup.appendChild(peg);
+            }
+        }
+
+        // Calculate the starting position to center the slots
+        const startX = boardwidth - ((totalSlots - 1) * slotspacing) / 2;
+
+        // Adjust multipliers to match totalSlots
+        const baseMultipliers = [50, 10, 5, 1.2, 0.9, 0.5, 0.9, 1.2, 5, 10, 50];
+        if (totalSlots !== baseMultipliers.length) {
+            const scalingFactor = baseMultipliers.length / totalSlots;
+            this.multipliers = Array.from({ length: totalSlots }, (_, i) =>
+                baseMultipliers[Math.min(baseMultipliers.length - 1, Math.floor(i * scalingFactor))]
+            );
+        } else {
+            this.multipliers = [...baseMultipliers];
+        }
+
+
+        // Draw slots and multipliers
+        this.multipliers.forEach((multiplier, i) => {
+            const x = startX + i * slotspacing;
+            const slot = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            slot.setAttribute("x", x - slotwidth / 2);
+            slot.setAttribute("y", 700);
+            slot.setAttribute("width", slotwidth);
+            slot.setAttribute("height", 60);
+            slot.setAttribute("fill", "#444");
+            this.slotsGroup.appendChild(slot);
+
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", x);
+            text.setAttribute("y", 780);
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("fill", "white");
+            text.textContent = `${multiplier}x`;
+            this.multipliersGroup.appendChild(text);
+        });
+    }
+
 }
-
-// Make sure the script is loading
-console.log('Plinko script loaded');
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM loaded, initializing game...');
