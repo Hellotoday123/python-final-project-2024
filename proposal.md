@@ -1,13 +1,14 @@
 # [Casino Application]
 
 ## Project Description
-[The user will be given an option to play plinko, blackjack, mines etc.]
+[the user will have a plinko application to play on being able to bet, set the amount of balls that falls and the risk they want]
 
 ## Main Idea
-[Its a probability based web server where user can deposit, withdraw money from their account and get a chance to win money through the games however its rigged to make the user lose more often than winning.]
+[it is a probability based web server where user can play the plink game and set 
+the bet amount and "earn" money for fun. It is also rigged so that the user isn't constantly winning and would have a higher chance on losing]
 
 ## Technologies
-[i will be using RANDOM and TIME]
+[I used Flask, render_template, request, jsonify, random]
 
 ## Project Timeline
 - Week 4: Project initialization and setup
