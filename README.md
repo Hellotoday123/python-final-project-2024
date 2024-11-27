@@ -2,7 +2,7 @@
 
 ## Student Name: [Kevin Alinazar]
 
-## Project Title: [Casino Application]
+## Project Title: [Plinko Application]
 
 This repository contains my final project for the Python course.
 - `proposal.md`: Project proposal
