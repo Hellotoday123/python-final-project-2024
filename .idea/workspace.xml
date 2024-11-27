@@ -24,12 +24,12 @@
     &quot;assignee&quot;: &quot;Hellotoday123&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/bobbyconnolly/python-plinko.git&quot;,
-    &quot;accountId&quot;: &quot;ff28a0cc-2c20-4d23-b1b4-7e2cb937cd20&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Hellotoday123/python-final-project-2024.git",
+    "accountId": "ff28a0cc-2c20-4d23-b1b4-7e2cb937cd20"
   }
-}</component>
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 6
 }</component>
@@ -112,7 +112,23 @@
       <option name="project" value="LOCAL" />
       <updated>1732681507235</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="plinko demo">
+      <option name="closed" value="true" />
+      <created>1732681670793</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1732681670793</updated>
+    </task>
+    <task id="LOCAL-00004" summary="plinko demo">
+      <option name="closed" value="true" />
+      <created>1732681959674</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1732681959674</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
