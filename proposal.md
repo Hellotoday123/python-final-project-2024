@@ -1,11 +1,10 @@
-# [Casino Application]
+# [Plinko Application]
 
 ## Project Description
 [the user will have a plinko application to play on being able to bet, set the amount of balls that falls and the risk they want]
 
 ## Main Idea
-[it is a probability based web server where user can play the plink game and set 
-the bet amount and "earn" money for fun. It is also rigged so that the user isn't constantly winning and would have a higher chance on losing]
+[it is a probability based web server where user can play the plink game and set the bet amount and "earn" money for fun. It is also rigged so that the user isn't constantly winning and would have a higher chance on losing]
 
 ## Technologies
 [I used Flask, render_template, request, jsonify, random]

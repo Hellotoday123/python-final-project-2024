@@ -1,3 +1,4 @@
+
 class PlinkoGame {
     constructor() {
         console.log('PlinkoGame constructor starting...');
@@ -15,7 +16,6 @@ class PlinkoGame {
         this.getBalance();
 
 
-        this.multipliers = [50, 10, 5, 1.2, 0.9, 0.5, 0.9, 1.2, 5, 10, 50];
         this.dropZones = [];
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -164,25 +164,91 @@ class PlinkoGame {
 
 
                 const betInput = document.getElementById('betAmount');
-                const ballAmountInput = document.getElementById('ballAmount');
                 this.betAmount = parseFloat(betInput.value) || 0;
-                const ballAmount = parseInt(ballAmountInput.value) || 0;
-                            this.dropChip(4); //temp
-                if (this.validateBet(this.betAmount, ballAmount)) {
-                    this.handleBet(-this.betAmount * ballAmount);
-                    for (let i = 0; i < ballAmount; i++) {
-                        this.dropChip(4);
-                    }
-                }else {
-                    alert('invalid bet amount or insufficient balance')}
+
+                if (this.validateBet(this.betAmount, 1)) {
+                    this.handleBet(-this.betAmount);
+                    this.dropChip(4); // temp, adjust as necessary for your logic
+                } else {
+                    alert('Invalid bet amount or insufficient balance');
+                }
             });
+        }
+        const lowRiskButton = document.getElementById('low');
+        const mediumRiskButton = document.getElementById('medium');
+        const highRiskButton = document.getElementById('high');
+
+        if (lowRiskButton) {
+            lowRiskButton.addEventListener('click', () => this.setRiskLevel('low'));
+        }
+
+        if (mediumRiskButton) {
+            mediumRiskButton.addEventListener('click', () => this.setRiskLevel('medium'));
+        }
+
+        if (highRiskButton) {
+            highRiskButton.addEventListener('click', () => this.setRiskLevel('high'));
         }
     }
 
-    validateBet(bet, ballAmount) {
+    setRiskLevel(level) {
+        if(level === 'low') {
+        this.multipliers = [100, 50, 10, 1, 0.8, 0.5, 0.8, 1, 10, 50, 100];
+        }
+        else if(level === 'medium') {
+        this.multipliers = [200, 150, 25, 1, 0.5, 0.3, 0.5, 1, 25, 150, 200];
+        }
+        else if(level === 'high') {
+        this.multipliers = [1000, 200, 10, 0.5, 0.3, 0.1, 0.3, 0.5, 10, 200, 1000];
+        }
+
+        console.log(`Risk level set to ${level}, multipliers updated:`, this.multipliers);
+        this.updateMultiplierDisplay();
+    }
+
+    updateMultiplierDisplay() {
+    // Clear existing multiplier texts
+    while (this.multipliersGroup.firstChild) {
+        this.multipliersGroup.removeChild(this.multipliersGroup.firstChild);
+        }
+        const boardwidth = 300;
+        const slotspacing = 50;
+        const slotwidth = 40;
+        const totalSlots = 11;
+        const startX = boardwidth - ((totalSlots - 1) * slotspacing) / 2;
+
+    this.multipliers.forEach((multiplier, i) => {
+            const x = startX + i * slotspacing;
+            const slot = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            slot.setAttribute("x", x - slotwidth / 2);
+            slot.setAttribute("y", 700);
+            slot.setAttribute("width", slotwidth);
+            slot.setAttribute("height", 60);
+            slot.setAttribute("fill", "#444");
+            this.slotsGroup.appendChild(slot);
+
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", x);
+            text.setAttribute("y", 780);
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("fill", "white");
+            text.textContent = `${multiplier}x`;
+            this.multipliersGroup.appendChild(text);
+        });
+    }
+
+    validateBet(bet, ballAmount = 1) {
         const isValid = bet >0 && bet * ballAmount <= this.balance;
         console.log(`Validating bet: ${bet} * ${ballAmount} <= ${this.balance} -> ${isValid}`);
         return isValid;
+    }
+
+    handleBet(amount) {
+        console.log(`Handling bet: ${amount}`);
+        this.balance += amount;
+        console.log(`New balance: ${this.balance}`);
+        this.updateBalanceDisplay();
+        this.syncBalance();
     }
 
     async getBalance() {
@@ -218,14 +284,6 @@ class PlinkoGame {
         }
     }
 
-    handleBet(amount) {
-        console.log(`Handling bet: ${amount}`);
-        this.balance += amount;
-        console.log(`New balance: ${this.balance}`);
-        this.updateBalanceDisplay();
-        this.syncBalance();
-    }
-
     updateBalanceDisplay() {
         this.displayBalance.textContent = `Balance: $${this.balance.toFixed(2)}`;
 
@@ -255,7 +313,7 @@ class PlinkoGame {
         const startX = boardwidth - ((totalSlots - 1) * slotspacing) / 2;
 
         // Adjust multipliers to match totalSlots
-        const baseMultipliers = [50, 10, 5, 1.2, 0.9, 0.5, 0.9, 1.2, 5, 10, 50];
+        const baseMultipliers = [100, 50, 10, 1, 0.8, 0.5, 0.8, 1, 10, 50, 100];
         if (totalSlots !== baseMultipliers.length) {
             const scalingFactor = baseMultipliers.length / totalSlots;
             this.multipliers = Array.from({ length: totalSlots }, (_, i) =>

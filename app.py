@@ -7,7 +7,7 @@ app = Flask(__name__)
 class PlinkoGame:
     def __init__(self):
         self.score = 0
-        self.multipliers = [50, 10, 5, 1.2, 0.9, 0.5, 0.9, 1.2, 5, 10, 50]
+        self.multipliers = [100, 50, 10, 1, 0.8, 0.5, 0.8, 1, 10, 50, 100]
 
     def drop_chip(self, start_position):
         """Simulate chip drop and return path and final position"""
@@ -70,22 +70,6 @@ def sync_balance():
 def index():
     balance = read_balance()  # Read the balance from the file
     return render_template("index.html", balance=balance)
-
-@app.route('/drop/<int:position>')
-def drop(position):
-    # Ensure position is within valid range
-    position = min(8, max(0, position))
-    result = game.drop_chip(position)
-
-    balance = read_balance()
-    new_balance = balance * result['multiplier']
-    write_balance(new_balance)
-
-    result['new_balance'] = new_balance
-
-    return jsonify(result)
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)
