@@ -1,8 +1,21 @@
+
+import sqlite3
 from flask import Flask, render_template, request, jsonify
 import random
+from functools import wraps
+
 
 app = Flask(__name__)
+# 127.0.0.1
+BLOCKED_IPS = {''}  # Add IPs you want to block
 
+def check_ip(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if request.remote_addr in BLOCKED_IPS:
+            return jsonify({'error': 'blocked'}), 403
+        return f(*args, **kwargs)
+    return wrapper
 
 class PlinkoGame:
     def __init__(self):
@@ -52,11 +65,13 @@ def write_balance(new_balance):
         file.write(f"{new_balance:.2f}")
 
 @app.route('/get_balance')
+@check_ip
 def get_balance():
     balance = read_balance()  # Read the balance from the file
     return {'balance': balance}
 
 @app.route('/sync_balance', methods=['POST'])
+@check_ip
 def sync_balance():
     data = request.get_json()
     balance = data.get('balance')
@@ -67,6 +82,7 @@ def sync_balance():
         return jsonify({"status": "error", "message": "Balance not provided"}), 400
 
 @app.route('/')
+@check_ip
 def index():
     balance = read_balance()  # Read the balance from the file
     return render_template("index.html", balance=balance)
