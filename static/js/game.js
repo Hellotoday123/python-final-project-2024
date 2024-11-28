@@ -28,7 +28,6 @@ class PlinkoGame {
         console.log('PlinkoGame constructor completed');
     }
 
-
     async loadSounds() {
         try {
             const [pingBuffer, landingBuffer] = await Promise.all([
@@ -150,7 +149,6 @@ class PlinkoGame {
         // Re-enable drop zones
         this.dropZones.forEach(zone => zone.style.pointerEvents = 'auto');
     }
-
 
     setupEventListeners() {
         const startButton = document.getElementById('startButton');
